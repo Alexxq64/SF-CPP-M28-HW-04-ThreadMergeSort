@@ -18,7 +18,8 @@
 #define QUICK_SORT_SINGLE_THREAD 3
 #define QUICK_SORT_PARALLEL_WITH_FUTURE 4
 #define PARALLEL_MERGE_SORT_THREAD 5
-const int FUNCTIONS_NUMBER = 6;
+#define STANDART_SORT 6
+const int FUNCTIONS_NUMBER = 7;
 
 long long arrayMinSizeForThread = 100000;
 
@@ -178,7 +179,7 @@ void quickSortParallelWithLimitedThreads(int* arr, long long left, long long rig
             }
         } while (leftBound <= rightBound);
 
-        if ((rightBound - left) > 10000) {
+        if ((rightBound - left) > arrayMinSizeForThread) {
             std::future<void> f = std::async(std::launch::async, [&] {
                 quickSort(arr, left, rightBound);
                 });
@@ -189,6 +190,11 @@ void quickSortParallelWithLimitedThreads(int* arr, long long left, long long rig
             quickSort(arr, leftBound, right);
         }
     }
+
+
+void standartSort(int* arr, long long left, long long right) {
+    std::sort(arr + left, arr + right + 1);
+}
 
 
 bool sortedArray(int* arr, long long size) {
@@ -236,6 +242,7 @@ void runSortingTests() {
         d[PARALLEL_MERGE_SORT_THREAD] = durationMeasure(parallelMergeSortWithThread, arraySize);
         d[QUICK_SORT_SINGLE_THREAD] = durationMeasure(quickSortSingleThread, arraySize);
         d[QUICK_SORT_PARALLEL_WITH_FUTURE] = durationMeasure(quickSortParallelWithLimitedThreads, arraySize);
+        d[STANDART_SORT] = durationMeasure(standartSort, arraySize);
 
         double basis = 0;
         for (auto e : d) {
@@ -244,10 +251,12 @@ void runSortingTests() {
 
         presentDuration("Single thread merge sort", basis, d[MERGE_SORT]);
         presentDuration("Single thread quick sort", basis, d[QUICK_SORT_SINGLE_THREAD]);
+        presentDuration("Standart sort", basis, d[STANDART_SORT]);
         presentDuration("Parallel merge sort with future", basis, d[PARALLEL_MERGE_SORT]);
         presentDuration("Parallel merge sort with thread", basis, d[PARALLEL_MERGE_SORT_THREAD]);
         presentDuration("Parallel merge sort with OMP", basis, d[PARALLEL_MERGE_SORT_OMP]);
         presentDuration("Parallel quick sort with future", basis, d[QUICK_SORT_PARALLEL_WITH_FUTURE]);
+
     }
 }
 
